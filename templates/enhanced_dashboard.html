@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced DevOps Intelligence Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover:hover { transform: translateY(-2px); transition: all 0.3s ease; }
+        .pulse-dot { animation: pulse 2s infinite; }
+        .alert-slide { animation: slideInRight 0.5s ease-out; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .chart-container { position: relative; height: 300px; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Alert Notifications -->
+    <div id="alert-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="gradient-bg text-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center">
+                        <i class="fas fa-brain mr-3"></i>
+                        Advanced DevOps Intelligence
+                    </h1>
+                    <p class="text-blue-100 mt-2">AI-Powered | Predictive | Real-Time Analytics</p>
+                </div>
+                <div class="text-right">
+                    <div id="system-status" class="pulse-dot w-3 h-3 bg-green-400 rounded-full inline-block mr-2"></div>
+                    <span class="text-sm">System Operational</span>
+                    <div class="text-xs mt-1">Health Score: <span id="health-score">--</span>/100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow card-hover">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-2xl font-bold" id="anomaly-count">0</div>
+                        <div class="text-sm text-gray-600">Anomalies</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow card-hover">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-blue-500 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-2xl font-bold" id="avg-response">--ms</div>
+                        <div class="text-sm text-gray-600">Avg Response</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow card-hover">
+                <div class="flex items-center">
+                    <i class="fas fa-memory text-purple-500 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-2xl font-bold" id="memory-usage">--%</div>
+                        <div class="text-sm text-gray-600">Memory Usage</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow card-hover">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-green-500 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-2xl font-bold" id="prediction-risk">Low</div>
+                        <div class="text-sm text-gray-600">Failure Risk</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- RL Performance Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-brain text-purple-500 mr-2"></i>
+                    RL Performance Trend
+                </h3>
+                <div class="chart-container">
+                    <canvas id="rlChart"></canvas>
+                </div>
+            </div>
+
+            <!-- System Metrics Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-server text-blue-500 mr-2"></i>
+                    System Metrics
+                </h3>
+                <div class="chart-container">
+                    <canvas id="metricsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictions & Recommendations -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Failure Prediction -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-crystal-ball text-indigo-500 mr-2"></i>
+                    Predictive Analysis
+                </h3>
+                <div id="prediction-content">
+                    <div class="flex justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Recommendations -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    AI Recommendations
+                </h3>
+                <div id="recommendations-content">
+                    <div class="flex justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anomalies & Events -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Anomaly Detection -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-search text-red-500 mr-2"></i>
+                    Anomaly Detection
+                </h3>
+                <div id="anomalies-content" class="max-h-64 overflow-y-auto">
+                    <div class="flex justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Events -->
+            <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                    Live Events Stream
+                </h3>
+                <div id="events-stream" class="max-h-64 overflow-y-auto">
+                    <div class="flex justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart instances
+        let rlChart, metricsChart;
+        let currentMode = 'user';
+        
+        // Initialize charts
+        function initCharts() {
+            // RL Performance Chart
+            const rlCtx = document.getElementById('rlChart').getContext('2d');
+            rlChart = new Chart(rlCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Reward Trend',
+                        data: [],
+                        borderColor: 'rgb(147, 51, 234)',
+                        backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Drift Score',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // System Metrics Chart
+            const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+            metricsChart = new Chart(metricsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: [],
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Memory Usage (%)',
+                        data: [],
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left' },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        // Set dashboard mode
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Update button styles
+            const userBtn = document.getElementById('user-mode-btn');
+            const devBtn = document.getElementById('dev-mode-btn');
+            const modeDesc = document.getElementById('mode-description');
+            
+            if (mode === 'user') {
+                userBtn.className = 'mode-btn bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition';
+                devBtn.className = 'mode-btn bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition';
+                modeDesc.textContent = 'Simplified view for business users';
+                
+                // Hide technical details
+                document.querySelectorAll('.dev-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.user-friendly').forEach(el => el.style.display = 'block');
+            } else {
+                userBtn.className = 'mode-btn bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 transition';
+                devBtn.className = 'mode-btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition';
+                modeDesc.textContent = 'Technical details for developers and ops teams';
+                
+                // Show technical details
+                document.querySelectorAll('.dev-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.user-friendly').forEach(el => el.style.display = 'none');
+            }
+            
+            // Reload data with new mode
+            loadAdvancedData();
+        }
+        
+        // Show alert notification
+        function showAlert(message, type = 'warning') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert-slide p-4 rounded-lg shadow-lg text-white max-w-sm ${
+                type === 'critical' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            alert.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'critical' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-auto">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Load advanced analytics data
+        function loadAdvancedData() {
+            // Load analytics insights
+            fetch('/api/analytics-insights')
+                .then(r => r.json())
+                .then(data => {
+                    updateQuickStats(data);
+                    updatePredictions(data);
+                    updateRecommendations(data);
+                    updateAnomalies(data);
+                    updateCharts(data);
+                })
+                .catch(err => console.error('Analytics error:', err));
+
+            // Load live events
+            fetch('/api/live-events')
+                .then(r => r.json())
+                .then(data => {
+                    updateEventsStream(data.events || []);
+                })
+                .catch(err => console.error('Events error:', err));
+        }
+
+        function updateQuickStats(data) {
+            const stats = data.summary_stats || {};
+            const prediction = data.performance_prediction || {};
+            
+            document.getElementById('anomaly-count').textContent = data.anomalies?.count || 0;
+            document.getElementById('avg-response').textContent = 
+                Math.round((stats.avg_response_time_sec || 0) * 1000) + 'ms';
+            document.getElementById('memory-usage').textContent = 
+                Math.round(stats.avg_memory_usage_pct || 0) + '%';
+            document.getElementById('prediction-risk').textContent = 
+                (prediction.risk || 'low').charAt(0).toUpperCase() + (prediction.risk || 'low').slice(1);
+            document.getElementById('health-score').textContent = 
+                Math.round(data.system_health_score || 0);
+            
+            // Update system status indicator
+            const healthScore = data.system_health_score || 0;
+            const statusDot = document.getElementById('system-status');
+            if (healthScore > 80) {
+                statusDot.className = 'pulse-dot w-3 h-3 bg-green-400 rounded-full inline-block mr-2';
+            } else if (healthScore > 60) {
+                statusDot.className = 'pulse-dot w-3 h-3 bg-yellow-400 rounded-full inline-block mr-2';
+            } else {
+                statusDot.className = 'pulse-dot w-3 h-3 bg-red-400 rounded-full inline-block mr-2';
+            }
+        }
+
+        function updatePredictions(data) {
+            const prediction = data.performance_prediction || {};
+            const content = document.getElementById('prediction-content');
+            
+            const riskColor = {
+                'low': 'text-green-600',
+                'medium': 'text-yellow-600', 
+                'high': 'text-orange-600',
+                'critical': 'text-red-600'
+            }[prediction.risk] || 'text-gray-600';
+            
+            if (currentMode === 'user') {
+                // User-friendly view
+                const riskEmoji = {
+                    'low': '✅',
+                    'medium': '⚠️', 
+                    'high': '🔥',
+                    'critical': '🚨'
+                }[prediction.risk] || '❓';
+                
+                const riskMessage = {
+                    'low': 'System is running smoothly',
+                    'medium': 'Minor issues detected, monitoring closely', 
+                    'high': 'Attention needed - potential issues ahead',
+                    'critical': 'Immediate action required!'
+                }[prediction.risk] || 'Status unknown';
+                
+                content.innerHTML = `
+                    <div class="text-center mb-4">
+                        <div class="text-6xl mb-2">${riskEmoji}</div>
+                        <div class="text-xl font-semibold ${riskColor}">${riskMessage}</div>
+                        <div class="text-sm text-gray-600 mt-2">System Health Assessment</div>
+                    </div>
+                    <div class="user-friendly">
+                        ${prediction.risk !== 'low' ? `
+                            <div class="bg-blue-50 p-3 rounded mt-3">
+                                <div class="font-semibold text-blue-800">What this means:</div>
+                                <div class="text-sm text-blue-700 mt-1">
+                                    ${prediction.risk === 'critical' ? 'Your system may experience downtime soon. Contact your IT team immediately.' :
+                                      prediction.risk === 'high' ? 'Performance issues detected. Your IT team should investigate.' :
+                                      'Minor performance variations detected. Normal monitoring continues.'}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                // Developer view with technical details
+                content.innerHTML = `
+                    <div class="text-center mb-4">
+                        <div class="text-3xl font-bold ${riskColor}">${(prediction.risk || 'Unknown').toUpperCase()}</div>
+                        <div class="text-sm text-gray-600">Failure Risk Level</div>
+                        <div class="text-xs text-gray-500 mt-1">Confidence: ${Math.round((prediction.confidence || 0) * 100)}%</div>
+                        <div class="text-xs text-gray-500">Risk Score: ${(prediction.risk_score || 0).toFixed(3)}</div>
+                    </div>
+                    <div class="dev-only space-y-2">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">Technical Reasons:</div>
+                        ${(prediction.reasons || []).map(reason => 
+                            `<div class="text-sm bg-gray-100 p-2 rounded font-mono">${reason}</div>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+            
+            // Show critical alerts
+            if (prediction.risk === 'critical') {
+                showAlert('CRITICAL: System failure predicted!', 'critical');
+            } else if (prediction.risk === 'high') {
+                showAlert('WARNING: High failure risk detected', 'warning');
+            }
+        }
+
+        function updateRecommendations(data) {
+            const recommendations = data.recommendations || [];
+            const content = document.getElementById('recommendations-content');
+            
+            if (recommendations.length === 0) {
+                const message = currentMode === 'user' ? 
+                    'Everything looks good! No action needed.' : 
+                    'No recommendations at this time';
+                content.innerHTML = `<div class="text-gray-500 text-center">${message}</div>`;
+                return;
+            }
+            
+            if (currentMode === 'user') {
+                // User-friendly recommendations
+                const userFriendlyRecs = recommendations.map(rec => {
+                    if (rec.includes('scale up') || rec.includes('scaling')) return 'Consider adding more server capacity';
+                    if (rec.includes('memory') || rec.includes('Memory')) return 'Check for memory-intensive processes';
+                    if (rec.includes('database') || rec.includes('Database')) return 'Database performance needs attention';
+                    if (rec.includes('rollback') || rec.includes('Rollback')) return 'Consider reverting recent changes';
+                    if (rec.includes('alert') || rec.includes('Alert')) return 'Notify your technical team';
+                    return rec;
+                });
+                
+                content.innerHTML = userFriendlyRecs.map((rec, idx) => `
+                    <div class="flex items-start mb-3 p-3 bg-blue-50 rounded">
+                        <i class="fas fa-lightbulb text-blue-500 mt-1 mr-3"></i>
+                        <span class="text-sm">${rec}</span>
+                    </div>
+                `).join('');
+            } else {
+                // Developer view with technical details
+                content.innerHTML = recommendations.map((rec, idx) => `
+                    <div class="flex items-start mb-3 p-3 bg-yellow-50 rounded dev-only">
+                        <i class="fas fa-terminal text-yellow-600 mt-1 mr-3"></i>
+                        <span class="text-sm font-mono">${rec}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateAnomalies(data) {
+            const anomalies = data.anomalies?.details || [];
+            const content = document.getElementById('anomalies-content');
+            
+            if (anomalies.length === 0) {
+                content.innerHTML = '<div class="text-gray-500 text-center">No anomalies detected</div>';
+                return;
+            }
+            
+            content.innerHTML = anomalies.map(anomaly => `
+                <div class="mb-3 p-3 border-l-4 ${
+                    anomaly.severity === 'high' ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50'
+                }">
+                    <div class="font-semibold text-sm">${anomaly.severity.toUpperCase()} Anomaly</div>
+                    <div class="text-xs text-gray-600 mt-1">Score: ${anomaly.score.toFixed(3)}</div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        Severity: ${anomaly.features.severity}, Errors: ${anomaly.features.error_count}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateEventsStream(events) {
+            const content = document.getElementById('events-stream');
+            
+            if (events.length === 0) {
+                content.innerHTML = '<div class="text-gray-500 text-center">No recent events</div>';
+                return;
+            }
+            
+            if (currentMode === 'user') {
+                // User-friendly event descriptions
+                const userEvents = events.slice(-10).map(event => {
+                    let description = '';
+                    let icon = 'fas fa-circle';
+                    let color = 'text-blue-500';
+                    
+                    if (event.event_type.includes('deploy.success')) {
+                        description = 'Application updated successfully';
+                        icon = 'fas fa-check-circle';
+                        color = 'text-green-500';
+                    } else if (event.event_type.includes('deploy.failed')) {
+                        description = 'Application update failed';
+                        icon = 'fas fa-times-circle';
+                        color = 'text-red-500';
+                    } else if (event.event_type.includes('heal')) {
+                        description = 'System auto-recovery in progress';
+                        icon = 'fas fa-wrench';
+                        color = 'text-orange-500';
+                    } else if (event.event_type.includes('uptime')) {
+                        description = 'System health check completed';
+                        icon = 'fas fa-heartbeat';
+                        color = 'text-green-500';
+                    } else if (event.event_type.includes('rl')) {
+                        description = 'AI system learning update';
+                        icon = 'fas fa-brain';
+                        color = 'text-purple-500';
+                    } else {
+                        description = event.event_type.replace(/[._]/g, ' ');
+                        icon = 'fas fa-info-circle';
+                    }
+                    
+                    return { ...event, description, icon, color };
+                });
+                
+                content.innerHTML = userEvents.map(event => `
+                    <div class="mb-2 p-3 bg-white border rounded text-sm hover:shadow-sm transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="${event.icon} ${event.color} mr-2"></i>
+                                <span>${event.description}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${new Date(event.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                // Developer view with technical details
+                content.innerHTML = events.slice(-10).map(event => `
+                    <div class="mb-2 p-2 bg-gray-900 text-green-400 rounded text-sm font-mono dev-only">
+                        <div class="flex items-center justify-between">
+                            <span class="text-yellow-400">${event.event_type}</span>
+                            <span class="text-xs text-gray-500">${new Date(event.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                        <div class="text-xs text-gray-300 mt-1">${JSON.stringify(event.data).substring(0, 60)}...</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateCharts(data) {
+            // Update RL chart with dummy data for now
+            const now = new Date();
+            const timeLabels = Array.from({length: 10}, (_, i) => 
+                new Date(now - (9-i) * 60000).toLocaleTimeString()
+            );
+            
+            rlChart.data.labels = timeLabels;
+            rlChart.data.datasets[0].data = Array.from({length: 10}, () => Math.random() * 2 - 1);
+            rlChart.data.datasets[1].data = Array.from({length: 10}, () => Math.random());
+            rlChart.update();
+            
+            // Update metrics chart
+            metricsChart.data.labels = timeLabels;
+            metricsChart.data.datasets[0].data = Array.from({length: 10}, () => Math.random() * 1000);
+            metricsChart.data.datasets[1].data = Array.from({length: 10}, () => Math.random() * 100);
+            metricsChart.update();
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            setMode('user'); // Start in user mode
+            loadAdvancedData();
+            
+            // Auto-refresh every 10 seconds
+            setInterval(loadAdvancedData, 10000);
+        });
+    </script>
+</body>
+</html>

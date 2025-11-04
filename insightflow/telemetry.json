@@ -1,0 +1,22 @@
+{
+  "system_metrics": {
+    "uptime_percentage": 99.2,
+    "heal_success_rate": 87.5,
+    "avg_response_time": 45.3,
+    "total_deployments": 12,
+    "failed_deployments": 1
+  },
+  "rl_metrics": {
+    "policy_updates": 156,
+    "avg_reward_trend": -0.23,
+    "drift_stability": "moderate",
+    "learning_rate": 0.1
+  },
+  "agent_performance": {
+    "deploy_agent": {"status": "active", "success_rate": 91.7},
+    "heal_agent": {"status": "active", "success_rate": 87.5},
+    "uptime_agent": {"status": "active", "checks_per_hour": 12},
+    "rl_optimizer": {"status": "active", "updates_per_day": 8}
+  },
+  "last_updated": "2024-01-20T15:30:00Z"
+}
