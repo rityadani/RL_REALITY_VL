@@ -2,31 +2,31 @@
   "q_table": {
     "0_0_0": {
       "monitor": -0.6033783014634,
-      "scale_up": -0.5961258742998,
-      "restart_service": -0.5661567813830001,
-      "alert_team": -0.519642779,
+      "scale_up": -0.8429098286189756,
+      "restart_service": -0.8045880101744374,
+      "alert_team": -0.6157588988534,
       "rollback": -0.7265339583047401
     },
     "1_0_0": {
-      "monitor": -0.582964656,
-      "scale_up": -0.58475678586,
+      "monitor": -0.9071485954620361,
+      "scale_up": -0.9130319746267921,
       "restart_service": -0.6023232510000001,
       "alert_team": -0.8541103799292001,
       "rollback": -0.6246760611827401
     },
     "2_2_2": {
-      "monitor": -1.1378239046948766,
-      "scale_up": -1.11583309641474,
-      "restart_service": -1.09536312094014,
-      "alert_team": -1.0831156118004,
-      "rollback": -1.1305651928087999
+      "monitor": -1.3442453186844456,
+      "scale_up": -1.3219919225147407,
+      "restart_service": -1.4948652338013568,
+      "alert_team": -1.4829533709388327,
+      "rollback": -1.3352508092693944
     },
     "2_1_2": {
-      "monitor": -0.7244867162117401,
+      "monitor": -1.0527868364152146,
       "scale_up": -0.864000764881206,
-      "restart_service": -0.6254848480020001,
-      "alert_team": -0.6971348415719401,
-      "rollback": -0.56001280247574
+      "restart_service": -0.9483613418791268,
+      "alert_team": -0.9013695689140941,
+      "rollback": -1.1058650434196724
     }
   },
   "policy_history": [
@@ -610,11 +610,151 @@
       "action": "monitor",
       "reward": -2.55,
       "q_value": -1.1378239046948766
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.594889",
+      "state": "0_0_0",
+      "action": "alert_team",
+      "reward": -0.5,
+      "q_value": -0.57014532014
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595674",
+      "state": "1_0_0",
+      "action": "monitor",
+      "reward": -2.85,
+      "q_value": -0.9071485954620361
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595751",
+      "state": "2_2_2",
+      "action": "restart_service",
+      "reward": -2.55,
+      "q_value": -1.2912279610689426
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595779",
+      "state": "2_1_2",
+      "action": "rollback",
+      "reward": 1.1,
+      "q_value": -0.444965632552636
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595800",
+      "state": "0_0_0",
+      "action": "restart_service",
+      "reward": -2.55,
+      "q_value": -0.8045880101744374
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595820",
+      "state": "2_1_2",
+      "action": "rollback",
+      "reward": -2.85,
+      "q_value": -0.7829494743594084
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595844",
+      "state": "2_2_2",
+      "action": "alert_team",
+      "reward": -2.55,
+      "q_value": -1.2860976869405398
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595863",
+      "state": "2_1_2",
+      "action": "restart_service",
+      "reward": -2.85,
+      "q_value": -0.9483613418791268
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.595882",
+      "state": "2_2_2",
+      "action": "scale_up",
+      "reward": -2.55,
+      "q_value": -1.3219919225147407
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624330",
+      "state": "0_0_0",
+      "action": "alert_team",
+      "reward": -0.5,
+      "q_value": -0.6157588988534
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624367",
+      "state": "1_0_0",
+      "action": "scale_up",
+      "reward": -2.85,
+      "q_value": -0.9130319746267921
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624390",
+      "state": "2_2_2",
+      "action": "rollback",
+      "reward": -2.55,
+      "q_value": -1.3352508092693944
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624412",
+      "state": "2_1_2",
+      "action": "alert_team",
+      "reward": 1.1,
+      "q_value": -0.571072686101728
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624431",
+      "state": "0_0_0",
+      "action": "scale_up",
+      "reward": -2.55,
+      "q_value": -0.8429098286189756
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624450",
+      "state": "2_1_2",
+      "action": "alert_team",
+      "reward": -2.85,
+      "q_value": -0.9013695689140941
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624468",
+      "state": "2_2_2",
+      "action": "monitor",
+      "reward": -2.55,
+      "q_value": -1.3442453186844456
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624558",
+      "state": "2_1_2",
+      "action": "monitor",
+      "reward": -2.85,
+      "q_value": -1.0527868364152146
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624589",
+      "state": "2_2_2",
+      "action": "alert_team",
+      "reward": -2.55,
+      "q_value": -1.4829533709388327
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624609",
+      "state": "2_1_2",
+      "action": "rollback",
+      "reward": -2.85,
+      "q_value": -1.1058650434196724
+    },
+    {
+      "timestamp": "2025-11-04T12:41:50.624628",
+      "state": "2_2_2",
+      "action": "restart_service",
+      "reward": -2.55,
+      "q_value": -1.4948652338013568
     }
   ],
   "drift_metrics": {
-    "drift_score": 0.8507159046531644,
-    "total_updates": 83,
-    "recent_avg_reward": -2.07
+    "drift_score": 1.1044350670790508,
+    "total_updates": 103,
+    "recent_avg_reward": -2.305
   }
 }

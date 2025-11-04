@@ -10,7 +10,7 @@
     {
       "test": "log_processing",
       "status": "PASS",
-      "states_processed": 7
+      "states_processed": 9
     },
     {
       "test": "reward_calculation",
@@ -36,30 +36,30 @@
     {
       "failure_injected": "database_timeout",
       "agent_learned": true,
-      "new_policy_updates": 16
+      "new_policy_updates": 20
     },
     {
       "failure_injected": "memory_leak",
       "agent_learned": true,
-      "new_policy_updates": 25
+      "new_policy_updates": 31
     }
   ],
   "final_dashboard_data": {
     "daily_report": {
-      "date": "2025-11-01",
-      "drift_score": 0.35542309594,
-      "total_policy_updates": 38,
-      "avg_reward": -2.07,
+      "date": "2025-11-04",
+      "drift_score": 1.1044350670790508,
+      "total_policy_updates": 103,
+      "avg_reward": -2.305,
       "q_table_size": 4,
       "exploration_rate": 0.1,
       "learning_rate": 0.1
     },
     "trends": {
       "drift_trend": "increasing",
-      "reward_trend": "improving",
-      "total_days": 5,
-      "avg_drift_score": 0.26227738246800003,
-      "avg_reward": -1.7510000000000001,
+      "reward_trend": "declining",
+      "total_days": 12,
+      "avg_drift_score": 0.5493971359726104,
+      "avg_reward": -1.9566666666666668,
       "policy_stability": "stable"
     }
   }
