@@ -1,7 +1,6 @@
 from flask import Flask, render_template_string, jsonify
 import json
 import os
-import pandas as pd
 from datetime import datetime
 import random
 
@@ -16,11 +15,22 @@ def get_data():
             with open('current_policy.json', 'r') as f:
                 policy = json.load(f)
         
-        # CSV data
+        # CSV data (simplified without pandas)
         reports = []
         if os.path.exists('policy_report.csv'):
-            df = pd.read_csv('policy_report.csv')
-            reports = df.to_dict('records')
+            try:
+                with open('policy_report.csv', 'r') as f:
+                    lines = f.readlines()
+                    if len(lines) > 1:  # Skip header
+                        for line in lines[1:]:
+                            parts = line.strip().split(',')
+                            if len(parts) >= 3:
+                                reports.append({
+                                    'day': parts[0],
+                                    'drift_score': float(parts[2]) if parts[2] else 0.0
+                                })
+            except:
+                reports = []
         
         return jsonify({
             'drift_score': policy.get('drift_metrics', {}).get('drift_score', random.uniform(0.2, 0.8)),
