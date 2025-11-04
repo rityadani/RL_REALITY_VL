@@ -571,7 +571,7 @@ def dashboard():
     ''')
 
 if __name__ == '__main__':
-    print("🎨 Starting Awesome RL Dashboard...")
-    print("🌟 Modern UI with animations and real-time updates")
-    print("📍 URL: http://localhost:8080")
-    app.run(debug=True, port=8080, host='0.0.0.0')
+    import os
+    port = int(os.environ.get('PORT', 8080))
+    print(f"🎨 Starting RL Dashboard on port {port}...")
+    app.run(debug=False, port=port, host='0.0.0.0')
