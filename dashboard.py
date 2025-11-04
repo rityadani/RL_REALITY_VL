@@ -573,5 +573,7 @@ def dashboard():
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 8080))
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
     print(f"🎨 Starting RL Dashboard on port {port}...")
-    app.run(debug=False, port=port, host='0.0.0.0')
+    print(f"🌍 Environment: {'Development' if debug_mode else 'Production'}")
+    app.run(debug=debug_mode, port=port, host='0.0.0.0')
