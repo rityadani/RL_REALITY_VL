@@ -1,13 +1,19 @@
 import numpy as np
 import json
 from datetime import datetime
+from prod_connector import ProductionConnector
 
 class SmartRLAgent:
-    def __init__(self, learning_rate=0.1, epsilon=0.1):
+    def __init__(self, learning_rate=0.1, epsilon=0.1, production_mode=False):
         self.learning_rate = learning_rate
         self.epsilon = epsilon
         self.q_table = {}
         self.policy_history = []
+        self.production_mode = production_mode
+        
+        # Initialize production connector if in production mode
+        if self.production_mode:
+            self.prod_connector = ProductionConnector()
         
         self.actions = ['monitor', 'scale_up', 'restart_service', 'alert_team', 'rollback']
         
@@ -71,12 +77,77 @@ class SmartRLAgent:
             'recent_avg_reward': np.mean([u['reward'] for u in recent_updates])
         }
     
+    def execute_live_action(self, action, domain, context=None):
+        """Execute action on live production domain"""
+        if not self.production_mode:
+            return {'status': 'skipped', 'reason': 'Not in production mode'}
+        
+        try:
+            if action == 'restart_service':
+                service_name = context.get('service', 'main-app') if context else 'main-app'
+                result = self.prod_connector.execute_restart_command(domain, service_name)
+                
+            elif action == 'rollback':
+                rollback_data = {'version': 'previous', 'type': 'rollback'}
+                result = self.prod_connector.execute_deploy_command(domain, rollback_data)
+                
+            elif action == 'scale_up':
+                scale_data = {'action': 'scale', 'instances': '+1'}
+                result = self.prod_connector.execute_deploy_command(domain, scale_data)
+                
+            else:
+                # For monitor and alert_team, just log the action
+                result = {
+                    'status': 'logged',
+                    'action': action,
+                    'domain': domain,
+                    'timestamp': datetime.now().isoformat()
+                }
+            
+            # Record the live action in policy history
+            self.policy_history.append({
+                'timestamp': datetime.now().isoformat(),
+                'action': action,
+                'domain': domain,
+                'result': result,
+                'type': 'live_execution'
+            })
+            
+            return result
+            
+        except Exception as e:
+            error_result = {
+                'status': 'error',
+                'action': action,
+                'domain': domain,
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            self.policy_history.append({
+                'timestamp': datetime.now().isoformat(),
+                'action': action,
+                'domain': domain,
+                'result': error_result,
+                'type': 'live_execution_failed'
+            })
+            
+            return error_result
+    
+    def get_live_domain_state(self, domain):
+        """Get current state from live domain"""
+        if not self.production_mode:
+            return None
+        
+        return self.prod_connector.read_app_state(domain)
+    
     def save_policy(self, filename):
         """Save current policy to file"""
         policy_data = {
             'q_table': self.q_table,
             'policy_history': self.policy_history,
-            'drift_metrics': self.get_policy_drift()
+            'drift_metrics': self.get_policy_drift(),
+            'production_mode': self.production_mode
         }
         
         with open(filename, 'w') as f:
