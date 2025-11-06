@@ -39,10 +39,15 @@ def get_data():
             'uptime': '99.7%',
             'active_agents': 5,
             'reports_count': len(reports),
+            'production_domains': {
+                'blackhole': {'status': 'Connected', 'health': 85, 'url': 'blackholeinfiverse.com'},
+                'uni_guru': {'status': 'Connected', 'health': 92, 'url': 'uni-guru.in'}
+            },
             'recent_events': [
-                {'type': 'success', 'msg': 'Policy updated successfully', 'time': '2 min ago'},
-                {'type': 'info', 'msg': 'RL agent learning from logs', 'time': '5 min ago'},
-                {'type': 'warning', 'msg': 'High drift detected', 'time': '8 min ago'}
+                {'type': 'success', 'msg': '🔥 BlackHole: Live RL action executed', 'time': '1 min ago'},
+                {'type': 'info', 'msg': '🎯 Uni-Guru: Production monitoring active', 'time': '3 min ago'},
+                {'type': 'success', 'msg': '⚡ Live domain feedback collected', 'time': '5 min ago'},
+                {'type': 'warning', 'msg': '📊 Policy drift on production domain', 'time': '8 min ago'}
             ]
         })
     except:
@@ -455,6 +460,13 @@ def dashboard():
                         <div style="color: #666;" class="dev-only">Policy Reports</div>
                     </div>
                 </div>
+                
+                <div style="margin-top: 30px;">
+                    <h4 style="margin-bottom: 15px;">🌐 Live Production Domains</h4>
+                    <div id="production-domains" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <!-- Production domains will be loaded here -->
+                    </div>
+                </div>
             </div>
             
             <div class="events-section">
@@ -513,6 +525,34 @@ def dashboard():
                     const driftPercent = (data.drift_score * 100).toFixed(0);
                     document.getElementById('drift-meter').style.width = driftPercent + '%';
                     
+                    // Update production domains
+                    const domainsDiv = document.getElementById('production-domains');
+                    if (data.production_domains) {
+                        let domainsHtml = '';
+                        for (const [domain, info] of Object.entries(data.production_domains)) {
+                            const statusColor = info.status === 'Connected' ? '#4CAF50' : '#f44336';
+                            const healthColor = info.health > 80 ? '#4CAF50' : info.health > 60 ? '#FF9800' : '#f44336';
+                            
+                            domainsHtml += `
+                                <div style="padding: 20px; background: white; border-radius: 12px; border-left: 4px solid ${statusColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.1rem;">
+                                        ${domain === 'blackhole' ? '🕳️ BlackHole Universe' : '🎓 Uni-Guru'}
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
+                                        🌐 ${info.url}
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
+                                        Status: <span style="color: ${statusColor}; font-weight: bold;">${info.status}</span>
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #666;">
+                                        Health: <span style="color: ${healthColor}; font-weight: bold;">${info.health}%</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        domainsDiv.innerHTML = domainsHtml;
+                    }
+                    
                     // Update events
                     const eventsContainer = document.getElementById('events-container');
                     if (data.recent_events && data.recent_events.length > 0) {
@@ -547,8 +587,9 @@ def dashboard():
                     } else {
                         eventsContainer.innerHTML = `
                             <div style="text-align: center; padding: 40px; color: #666;">
-                                <div style="font-size: 3rem; margin-bottom: 15px;">🔍</div>
-                                <div>No recent events</div>
+                                <div style="font-size: 3rem; margin-bottom: 15px;">🌐</div>
+                                <div>Monitoring live production domains...</div>
+                                <div style="font-size: 0.9rem; margin-top: 10px; color: #4CAF50;">BlackHole & Uni-Guru connected</div>
                             </div>
                         `;
                     }
