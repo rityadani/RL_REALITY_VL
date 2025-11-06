@@ -18,7 +18,7 @@ def get_live_monitoring():
         
         # Get live data from BlackHole
         try:
-            blackhole_response = requests.get('https://blackholeinfiverse.com', timeout=5)
+            blackhole_response = requests.get('https://blackholeinfiverse.com/', timeout=5)
             blackhole_status = 'Connected' if blackhole_response.status_code == 200 else 'Error'
             blackhole_response_time = int(blackhole_response.elapsed.total_seconds() * 1000)
         except:
@@ -27,7 +27,7 @@ def get_live_monitoring():
         
         # Get live data from Uni-Guru
         try:
-            uni_guru_response = requests.get('https://uni-guru.in', timeout=5)
+            uni_guru_response = requests.get('https://www.uni-guru.in/', timeout=5)
             uni_guru_status = 'Connected' if uni_guru_response.status_code == 200 else 'Error'
             uni_guru_response_time = int(uni_guru_response.elapsed.total_seconds() * 1000)
         except:
@@ -44,7 +44,7 @@ def get_live_monitoring():
                 'last_action': 'monitor' if blackhole_status == 'Connected' else 'none',
                 'uptime': '99.8%' if blackhole_status == 'Connected' else '0%',
                 'errors_24h': 0 if blackhole_status == 'Connected' else 999,
-                'url': 'blackholeinfiverse.com'
+                'url': 'blackholeinfiverse.com/'
             },
             'uni_guru': {
                 'status': uni_guru_status,
@@ -55,7 +55,7 @@ def get_live_monitoring():
                 'last_action': 'monitor' if uni_guru_status == 'Connected' else 'none',
                 'uptime': '99.9%' if uni_guru_status == 'Connected' else '0%',
                 'errors_24h': 0 if uni_guru_status == 'Connected' else 999,
-                'url': 'uni-guru.in'
+                'url': 'www.uni-guru.in/'
             },
             'timestamp': datetime.now().isoformat()
         })

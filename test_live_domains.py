@@ -5,8 +5,8 @@ from datetime import datetime
 def test_live_domains():
     """Test live connection to production domains"""
     domains = {
-        'BlackHole Universe': 'https://blackholeinfiverse.com',
-        'Uni-Guru Platform': 'https://uni-guru.in'
+        'BlackHole Universe': 'https://blackholeinfiverse.com/',
+        'Uni-Guru Platform': 'https://www.uni-guru.in/'
     }
     
     print("🔥 Testing LIVE Production Domains...")
