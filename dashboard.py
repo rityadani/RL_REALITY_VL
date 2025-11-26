@@ -4,10 +4,96 @@ import os
 from datetime import datetime
 import random
 import requests
+from telemetry_enhanced import telemetry
+from policy_visualizer import visualizer
+from unified_error_schema import error_schema
+from security_layer import require_auth, require_rate_limit_only, security
+from auto_failover import failover_manager
 
 app = Flask(__name__)
 
+@app.route('/api/telemetry')
+@require_rate_limit_only()
+def get_telemetry():
+    """Enhanced telemetry with latency and cost metrics"""
+    try:
+        summaries = telemetry.get_all_domains_summary()
+        return jsonify(summaries)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/policy-evolution')
+@require_rate_limit_only()
+def get_policy_evolution():
+    """Q-table evolution visualization data"""
+    try:
+        evolution_data = visualizer.get_evolution_data()
+        return jsonify(evolution_data)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/error-analytics')
+@require_rate_limit_only()
+def get_error_analytics():
+    """Unified error analytics"""
+    try:
+        # Simulate some errors for demo
+        sample_errors = [
+            error_schema.normalize_error('blackhole', 'timeout'),
+            error_schema.normalize_error('uni_guru', 'db_connection_failed'),
+            error_schema.normalize_error('blackhole', 'high_cpu')
+        ]
+        
+        stats = error_schema.get_error_statistics(sample_errors)
+        return jsonify({
+            'recent_errors': sample_errors,
+            'statistics': stats
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/failover-status')
+@require_rate_limit_only()
+def get_failover_status():
+    """Auto-failover status"""
+    try:
+        status = failover_manager.get_failover_status()
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/execute-failover', methods=['POST'])
+@require_auth('admin')
+def execute_failover():
+    """Execute failover (admin only)"""
+    try:
+        result = failover_manager.execute_failover()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/auth/token', methods=['POST'])
+def get_auth_token():
+    """Get JWT token for API access"""
+    try:
+        data = request.get_json()
+        api_key = data.get('api_key')
+        
+        role = security.validate_api_key(api_key)
+        if not role:
+            return jsonify({'error': 'Invalid API key'}), 401
+        
+        token = security.generate_jwt_token(role)
+        return jsonify({
+            'token': token,
+            'role': role,
+            'expires_in': 3600
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/live-monitoring')
+@require_rate_limit_only()
 def get_live_monitoring():
     """Real-time production monitoring data"""
     try:
@@ -16,23 +102,30 @@ def get_live_monitoring():
         
         connector = ProductionConnector()
         
-        # Get live data from BlackHole
+        # Get live data with enhanced telemetry
         try:
             blackhole_response = requests.get('https://blackholeinfiverse.com/', timeout=5)
             blackhole_status = 'Connected' if blackhole_response.status_code == 200 else 'Error'
             blackhole_response_time = int(blackhole_response.elapsed.total_seconds() * 1000)
+            
+            # Track telemetry
+            telemetry.track_domain_metrics('blackhole', 'health_check', blackhole_response_time, 0.001)
         except:
             blackhole_status = 'Disconnected'
             blackhole_response_time = 0
+            telemetry.track_domain_metrics('blackhole', 'health_check', 0, 0.001)
         
-        # Get live data from Uni-Guru
         try:
             uni_guru_response = requests.get('https://www.uni-guru.in/', timeout=5)
             uni_guru_status = 'Connected' if uni_guru_response.status_code == 200 else 'Error'
             uni_guru_response_time = int(uni_guru_response.elapsed.total_seconds() * 1000)
+            
+            # Track telemetry
+            telemetry.track_domain_metrics('uni_guru', 'health_check', uni_guru_response_time, 0.0008)
         except:
             uni_guru_status = 'Disconnected'
             uni_guru_response_time = 0
+            telemetry.track_domain_metrics('uni_guru', 'health_check', 0, 0.0008)
         
         return jsonify({
             'blackhole': {
@@ -381,6 +474,38 @@ def dashboard():
             </div>
         </div>
         
+        <!-- Enhanced Telemetry Section -->
+        <div class="production-section">
+            <div class="section-title">📊 Enhanced Telemetry</div>
+            <div id="telemetry-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <!-- Telemetry data will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Policy Evolution Section -->
+        <div class="production-section">
+            <div class="section-title">🧠 Policy Evolution</div>
+            <div id="policy-evolution" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                <!-- Policy evolution will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Error Analytics Section -->
+        <div class="production-section">
+            <div class="section-title">⚠️ Error Analytics</div>
+            <div id="error-analytics" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Error analytics will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Failover Status Section -->
+        <div class="production-section">
+            <div class="section-title">🔄 Auto-Failover Status</div>
+            <div id="failover-status" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                <!-- Failover status will be loaded here -->
+            </div>
+        </div>
+        
         <!-- Events Section -->
         <div class="events-section">
             <div class="section-title">🔔 Live Events</div>
@@ -688,11 +813,168 @@ def dashboard():
                 });
         }
         
+        function updateTelemetry() {
+            fetch('/api/telemetry')
+                .then(response => response.json())
+                .then(data => {
+                    const telemetryDiv = document.getElementById('telemetry-data');
+                    let telemetryHtml = '';
+                    
+                    for (const [domain, metrics] of Object.entries(data)) {
+                        if (!metrics) continue;
+                        
+                        const latencyColor = metrics.avg_latency_ms < 1000 ? '#4CAF50' : metrics.avg_latency_ms < 3000 ? '#FF9800' : '#f44336';
+                        
+                        telemetryHtml += `
+                            <div class="stat-card">
+                                <h4>${domain.toUpperCase()}</h4>
+                                <div style="color: ${latencyColor}; font-size: 1.2rem; font-weight: bold;">${metrics.avg_latency_ms}ms</div>
+                                <div style="font-size: 0.9rem; color: #666;">Avg Latency</div>
+                                <div style="margin-top: 10px;">
+                                    <div>Cost: $${metrics.total_cost}</div>
+                                    <div>Success: ${metrics.success_rate}%</div>
+                                    <div>Requests: ${metrics.total_requests}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    telemetryDiv.innerHTML = telemetryHtml;
+                });
+        }
+        
+        function updatePolicyEvolution() {
+            fetch('/api/policy-evolution')
+                .then(response => response.json())
+                .then(data => {
+                    const evolutionDiv = document.getElementById('policy-evolution');
+                    
+                    if (data.message) {
+                        evolutionDiv.innerHTML = `<div style="text-align: center; color: #666;">${data.message}</div>`;
+                        return;
+                    }
+                    
+                    let evolutionHtml = '<h4>Q-Table Evolution</h4>';
+                    
+                    if (data.trends) {
+                        evolutionHtml += `
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #2196F3;">${data.trends.q_table_growth.slice(-1)[0] || 0}</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Q-Table Size</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #4CAF50;">${data.trends.learning_progress.slice(-1)[0] || 0}</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Learning Progress</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #FF9800;">${Object.keys(data.current_best_actions).length}</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Top Actions</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    evolutionDiv.innerHTML = evolutionHtml;
+                });
+        }
+        
+        function updateErrorAnalytics() {
+            fetch('/api/error-analytics')
+                .then(response => response.json())
+                .then(data => {
+                    const errorDiv = document.getElementById('error-analytics');
+                    
+                    let errorHtml = `
+                        <div>
+                            <h4>Recent Errors</h4>
+                            <div style="max-height: 200px; overflow-y: auto;">
+                    `;
+                    
+                    data.recent_errors.forEach(error => {
+                        const severityColor = {
+                            'LOW': '#4CAF50',
+                            'MEDIUM': '#FF9800', 
+                            'HIGH': '#f44336',
+                            'CRITICAL': '#d32f2f'
+                        }[error.severity_name] || '#666';
+                        
+                        errorHtml += `
+                            <div style="padding: 10px; margin: 5px 0; background: white; border-radius: 5px; border-left: 3px solid ${severityColor};">
+                                <div style="font-weight: bold;">${error.error_type}</div>
+                                <div style="font-size: 0.8rem; color: #666;">${error.domain} - ${error.severity_name}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    errorHtml += `
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Statistics</h4>
+                            <div style="background: white; padding: 15px; border-radius: 5px;">
+                                <div>Total Errors: ${data.statistics.total}</div>
+                                <div>Avg Impact: ${data.statistics.avg_impact}/10</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    errorDiv.innerHTML = errorHtml;
+                });
+        }
+        
+        function updateFailoverStatus() {
+            fetch('/api/failover-status')
+                .then(response => response.json())
+                .then(data => {
+                    const failoverDiv = document.getElementById('failover-status');
+                    
+                    let failoverHtml = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #4CAF50;">${data.active_domain.toUpperCase()}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Active Domain</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #2196F3;">${data.failover_threshold}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Failure Threshold</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <h5>Domain Health:</h5>
+                    `;
+                    
+                    for (const [domain, health] of Object.entries(data.domains_health)) {
+                        const statusColor = {
+                            'HEALTHY': '#4CAF50',
+                            'DEGRADED': '#FF9800',
+                            'DOWN': '#f44336',
+                            'UNKNOWN': '#666'
+                        }[health.status] || '#666';
+                        
+                        failoverHtml += `
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                <span>${domain.toUpperCase()}</span>
+                                <span style="color: ${statusColor}; font-weight: bold;">${health.status}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    failoverHtml += '</div>';
+                    failoverDiv.innerHTML = failoverHtml;
+                });
+        }
+        
         // Update intervals
         setInterval(updateLiveMonitoring, 2000);
         setInterval(updateAILearning, 3000);
         setInterval(updateSystemHealth, 4000);
         setInterval(updatePerformance, 3500);
+        setInterval(updateTelemetry, 4000);
+        setInterval(updatePolicyEvolution, 5000);
+        setInterval(updateErrorAnalytics, 6000);
+        setInterval(updateFailoverStatus, 7000);
         setInterval(updateDashboard, 3000);
         setInterval(updateProjectFiles, 5000);
         
@@ -701,6 +983,10 @@ def dashboard():
         updateAILearning();
         updateSystemHealth();
         updatePerformance();
+        updateTelemetry();
+        updatePolicyEvolution();
+        updateErrorAnalytics();
+        updateFailoverStatus();
         updateDashboard();
         updateProjectFiles();
     </script>
