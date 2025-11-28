@@ -22,34 +22,34 @@ def test_live_domains():
             response_time = int((time.time() - start_time) * 1000)
             
             if response.status_code == 200:
-                print(f"✅ Status: CONNECTED")
-                print(f"⚡ Response Time: {response_time}ms")
-                print(f"📊 HTTP Code: {response.status_code}")
-                print(f"🎯 Health: EXCELLENT")
+                print(f"[OK] Status: CONNECTED")
+                print(f"[INFO] Response Time: {response_time}ms")
+                print(f"[INFO] HTTP Code: {response.status_code}")
+                print(f"[OK] Health: EXCELLENT")
             else:
-                print(f"⚠️ Status: CONNECTED (Warning)")
-                print(f"⚡ Response Time: {response_time}ms")
-                print(f"📊 HTTP Code: {response.status_code}")
-                print(f"🎯 Health: DEGRADED")
+                print(f"[WARN] Status: CONNECTED (Warning)")
+                print(f"[INFO] Response Time: {response_time}ms")
+                print(f"[INFO] HTTP Code: {response.status_code}")
+                print(f"[WARN] Health: DEGRADED")
                 
         except requests.exceptions.Timeout:
-            print(f"❌ Status: TIMEOUT")
-            print(f"⚡ Response Time: >10000ms")
-            print(f"🎯 Health: CRITICAL")
+            print(f"[ERROR] Status: TIMEOUT")
+            print(f"[INFO] Response Time: >10000ms")
+            print(f"[ERROR] Health: CRITICAL")
             
         except requests.exceptions.ConnectionError:
-            print(f"❌ Status: DISCONNECTED")
-            print(f"⚡ Response Time: 0ms")
-            print(f"🎯 Health: DOWN")
+            print(f"[ERROR] Status: DISCONNECTED")
+            print(f"[INFO] Response Time: 0ms")
+            print(f"[ERROR] Health: DOWN")
             
         except Exception as e:
-            print(f"❌ Status: ERROR")
-            print(f"🔥 Error: {str(e)}")
-            print(f"🎯 Health: UNKNOWN")
+            print(f"[ERROR] Status: ERROR")
+            print(f"[ERROR] Error: {str(e)}")
+            print(f"[ERROR] Health: UNKNOWN")
     
     print("\n" + "=" * 50)
-    print(f"🕐 Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("🚀 Live dashboard will show real-time status!")
+    print(f"[INFO] Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("[INFO] Live dashboard will show real-time status!")
 
 if __name__ == "__main__":
     test_live_domains()

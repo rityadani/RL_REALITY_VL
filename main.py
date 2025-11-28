@@ -19,9 +19,9 @@ def run_daily_task(day: int):
         from state_extraction import process_log_file
         
         states = process_log_file("log_sample.txt")
-        print(f"✓ Extracted {len(states)} states from logs")
-        print("✓ State extraction module ready")
-        print("✓ Mapping documentation created")
+        print(f"[OK] Extracted {len(states)} states from logs")
+        print("[OK] State extraction module ready")
+        print("[OK] Mapping documentation created")
         
     elif day == 2:
         print("=== Day 2: Severity-Based Reward Model ===")
@@ -35,9 +35,9 @@ def run_daily_task(day: int):
         
         for state in test_states:
             reward = model.calculate_reward(state)
-            print(f"✓ State {state} -> Reward: {reward:.2f}")
+            print(f"[OK] State {state} -> Reward: {reward:.2f}")
         
-        print("✓ Reward model implemented")
+        print("[OK] Reward model implemented")
         
     elif day == 3:
         print("=== Day 3: Policy Update Loop ===")
@@ -45,20 +45,20 @@ def run_daily_task(day: int):
         agent.learn_from_logs("log_sample.txt")
         
         drift = agent.get_policy_drift()
-        print(f"✓ Policy updates: {drift['total_updates']}")
-        print(f"✓ Drift score: {drift['drift_score']:.3f}")
+        print(f"[OK] Policy updates: {drift['total_updates']}")
+        print(f"[OK] Drift score: {drift['drift_score']:.3f}")
         
         agent.save_policy("current_policy.json")
-        print("✓ Adaptive learning implemented")
+        print("[OK] Adaptive learning implemented")
         
     elif day == 4:
         print("=== Day 4: Policy Drift Reports ===")
         dashboard_data = generate_dashboard_data()
         
-        print("✓ Daily report generated")
-        print(f"✓ Drift score: {dashboard_data['daily_report']['drift_score']:.3f}")
-        print(f"✓ Policy updates: {dashboard_data['daily_report']['total_policy_updates']}")
-        print("✓ CSV report saved")
+        print("[OK] Daily report generated")
+        print(f"[OK] Drift score: {dashboard_data['daily_report']['drift_score']:.3f}")
+        print(f"[OK] Policy updates: {dashboard_data['daily_report']['total_policy_updates']}")
+        print("[OK] CSV report saved")
         
     elif day == 5:
         print("=== Day 5: Integration Test ===")
@@ -66,9 +66,9 @@ def run_daily_task(day: int):
         results = tester.run_full_integration_test()
         
         summary = results['integration_test_summary']
-        print(f"✓ Tests passed: {summary['passed']}/{summary['total_tests']}")
-        print(f"✓ Success rate: {summary['success_rate']}")
-        print("✓ Integration complete")
+        print(f"[OK] Tests passed: {summary['passed']}/{summary['total_tests']}")
+        print(f"[OK] Success rate: {summary['success_rate']}")
+        print("[OK] Integration complete")
         
     else:
         print("Invalid day. Use 1-5.")
@@ -76,11 +76,11 @@ def run_daily_task(day: int):
 def show_project_status():
     """Show overall project status"""
     print("=== RL Reality Coupling v1 Status ===")
-    print("Day 1: ✓ State extraction (state_extraction.py)")
-    print("Day 2: ✓ Reward model (reward_model.py)")  
-    print("Day 3: ✓ Policy updates (smart_agent.py)")
-    print("Day 4: ✓ Drift reports (policy_report_generator.py)")
-    print("Day 5: ✓ Integration test (integration_test.py)")
+    print("Day 1: [OK] State extraction (state_extraction.py)")
+    print("Day 2: [OK] Reward model (reward_model.py)")  
+    print("Day 3: [OK] Policy updates (smart_agent.py)")
+    print("Day 4: [OK] Drift reports (policy_report_generator.py)")
+    print("Day 5: [OK] Integration test (integration_test.py)")
     print("\nReady for Shivam's dashboard integration!")
 
 def run_sovereign_system():
@@ -92,14 +92,14 @@ def run_sovereign_system():
     from core.mcp_bridge import integrate_rl_system
     
     integrate_rl_system()
-    print("✓ MCP bridge integrated")
+    print("[OK] MCP bridge integrated")
     
     # Run sovereign integration test
     from integration_test_sovereign import SovereignIntegrationTest
     tester = SovereignIntegrationTest()
     results = tester.run_full_sovereign_test()
     
-    print(f"✓ Sovereign system status: {results['sovereign_test_summary']['system_status']}")
+    print(f"[OK] Sovereign system status: {results['sovereign_test_summary']['system_status']}")
     
     # Start dashboard
     print("\n🚀 Starting dashboard at http://localhost:5000")
