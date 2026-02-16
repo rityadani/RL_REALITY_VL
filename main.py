@@ -112,17 +112,59 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         try:
             if sys.argv[1] == "sovereign":
-                run_sovereign_system()
-            else:
-                day = int(sys.argv[1])
-                run_daily_task(day)
-        except ValueError:
-            if sys.argv[1] == "status":
-                show_project_status()
-            else:
-                print("Usage: python main.py [1-5] or python main.py status or python main.py sovereign")
-    else:
-        show_project_status()
-        print("\nUsage: python main.py [day_number]")
-        print("Example: python main.py 3  # Run Day 3 tasks")
-        print("Example: python main.py sovereign  # Run full sovereign system")
+                else:
+                    print("Invalid day. Use 1-5.")
+
+            def show_project_status():
+                """Show overall project status"""
+                print("=== RL Reality Coupling v1 Status ===")
+                print("Day 1: [OK] State extraction (state_extraction.py)")
+                print("Day 2: [OK] Reward model (reward_model.py)")
+                print("Day 3: [OK] Policy updates (smart_agent.py)")
+                print("Day 4: [OK] Drift reports (policy_report_generator.py)")
+                print("Day 5: [OK] Integration test (integration_test.py)")
+                print("\nReady for Shivam's dashboard integration!")
+
+            def run_sovereign_system():
+                """Run complete sovereign DevOps system"""
+                print("=== Starting Sovereign DevOps Stack ===")
+    
+                # Start MCP bridge in background
+                import threading
+                from core.mcp_bridge import integrate_rl_system
+    
+                integrate_rl_system()
+                print("[OK] MCP bridge integrated")
+    
+                # Run sovereign integration test
+                from integration_test_sovereign import SovereignIntegrationTest
+                tester = SovereignIntegrationTest()
+                results = tester.run_full_sovereign_test()
+    
+                print(f"[OK] Sovereign system status: {results['sovereign_test_summary']['system_status']}")
+    
+                # Start dashboard
+                print("\nStarting dashboard at http://localhost:5000")
+                print("Press Ctrl+C to stop")
+    
+                import dashboard
+                dashboard.app.run(debug=False, port=5000)
+
+            if __name__ == "__main__":
+                if len(sys.argv) > 1:
+                    try:
+                        if sys.argv[1] == "sovereign":
+                            run_sovereign_system()
+                        else:
+                            day = int(sys.argv[1])
+                            run_daily_task(day)
+                    except ValueError:
+                        if sys.argv[1] == "status":
+                            show_project_status()
+                        else:
+                            print("Usage: python main.py [1-5] or python main.py status or python main.py sovereign")
+                else:
+                    show_project_status()
+                    print("\nUsage: python main.py [day_number]")
+                    print("Example: python main.py 3  # Run Day 3 tasks")
+                    print("Example: python main.py sovereign  # Run full sovereign system")
